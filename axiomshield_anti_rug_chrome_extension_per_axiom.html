@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AxiomShield | Rileva i Rug Pull su Axiom</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#090A0F',
+                        panel: '#11131C',
+                        panelBorder: '#1E2231',
+                        emerald: '#10B981',
+                        crimson: '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #090A0F;
+            color: #F8FAFC;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-emerald selection:text-obsidian">
+
+    <!-- 1. Navbar Minimale -->
+    <header class="border-b border-panelBorder bg-obsidian/80 backdrop-blur-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald/15 border border-emerald/40 flex items-center justify-center text-emerald">
+                    <i class="ph-fill ph-shield-check text-xl"></i>
+                </div>
+                <span class="text-lg font-bold tracking-tight text-white">Axiom<span class="text-emerald">Shield</span></span>
+            </div>
+
+            <button onclick="openModal()" class="bg-white/10 hover:bg-white/15 border border-white/10 text-white font-medium px-4 py-2 rounded-lg text-sm flex items-center space-x-2 transition-colors">
+                <i class="ph-bold ph-google-chrome-logo text-base text-emerald"></i>
+                <span>Aggiungi a Chrome</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 flex-1 flex flex-col justify-center">
+        
+        <!-- 2. Hero Section Centrata -->
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <div class="inline-flex items-center space-x-2 bg-panel border border-panelBorder px-3 py-1 rounded-full text-xs font-mono text-slate-400 mb-5">
+                <span class="w-2 h-2 rounded-full bg-emerald"></span>
+                <span>Estensione Chrome per Axiom.trade</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight mb-4">
+                Rileva i Rug Pull su Axiom <span class="text-emerald">prima di comprare.</span>
+            </h1>
+
+            <p class="text-slate-400 text-base sm:text-lg mb-8">
+                Un piccolo box automatico sopra Axiom che ti mostra subito Dev Wallet, Bundle e liquidità senza cambiare scheda.
+            </p>
+
+            <button onclick="openModal()" class="px-7 py-3.5 rounded-xl bg-emerald hover:bg-emerald/90 text-obsidian font-bold text-base inline-flex items-center space-x-2.5 shadow-lg shadow-emerald/20 transition-all">
+                <i class="ph-fill ph-google-chrome-logo text-xl"></i>
+                <span>Installa Gratis su Chrome</span>
+            </button>
+        </div>
+
+        <!-- 3. Card Demo Semplificata -->
+        <div class="max-w-xl mx-auto w-full mb-16">
+            <!-- Switch Rapido -->
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <button id="btn-safe" onclick="setMode('safe')" class="px-4 py-2 rounded-lg font-mono text-xs font-semibold border transition-all bg-emerald/15 border-emerald text-emerald">
+                    ✓ Esempio Token Sicuro
+                </button>
+                <button id="btn-rug" onclick="setMode('rug')" class="px-4 py-2 rounded-lg font-mono text-xs font-semibold border transition-all bg-panel border-panelBorder text-slate-400 hover:text-white">
+                    ✕ Esempio Rug Pull
+                </button>
+            </div>
+
+            <!-- Box Estensione -->
+            <div id="demo-card" class="bg-panel border border-emerald/40 rounded-2xl p-6 shadow-2xl transition-colors duration-300">
+                <!-- Header Box -->
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-panelBorder">
+                    <div class="flex items-center space-x-3">
+                        <div id="status-icon" class="w-10 h-10 rounded-xl bg-emerald/15 text-emerald flex items-center justify-center text-xl">
+                            <i class="ph-fill ph-check-circle"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span id="token-ticker" class="font-bold text-white text-lg">$BONK2</span>
+                                <span class="text-xs font-mono text-slate-500">su Axiom.trade</span>
+                            </div>
+                            <p id="status-label" class="text-xs font-mono font-semibold text-emerald">CONTRATTO PULITO — NESSUN BUNDLE</p>
+                        </div>
+                    </div>
+
+                    <div class="text-right font-mono">
+                        <span class="text-[11px] text-slate-400 block">Trust Score</span>
+                        <span id="trust-score" class="text-2xl font-bold text-emerald">94/100</span>
+                    </div>
+                </div>
+
+                <!-- 4 Dati Essenziali -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+                    <div class="bg-obsidian p-3 rounded-xl border border-panelBorder">
+                        <span class="text-[11px] text-slate-400 block mb-1">Dev Wallet</span>
+                        <span id="val-dev" class="text-sm font-bold text-emerald">0.0%</span>
+                    </div>
+
+                    <div class="bg-obsidian p-3 rounded-xl border border-panelBorder">
+                        <span class="text-[11px] text-slate-400 block mb-1">Sniper / Bundle</span>
+                        <span id="val-bundle" class="text-sm font-bold text-emerald">1.8%</span>
+                    </div>
+
+                    <div class="bg-obsidian p-3 rounded-xl border border-panelBorder">
+                        <span class="text-[11px] text-slate-400 block mb-1">Liquidità / LP</span>
+                        <span id="val-lp" class="text-sm font-bold text-emerald">Bruciata</span>
+                    </div>
+
+                    <div class="bg-obsidian p-3 rounded-xl border border-panelBorder">
+                        <span class="text-[11px] text-slate-400 block mb-1">Mint Auth</span>
+                        <span id="val-mint" class="text-sm font-bold text-emerald">Revocata</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 3 Punti Chiave Essenziali -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-panel/60 border border-panelBorder rounded-xl p-5">
+                <div class="text-emerald text-xl mb-2">
+                    <i class="ph-fill ph-stack"></i>
+                </div>
+                <h3 class="text-white font-bold text-base mb-1">Analisi Bundle & Sniper</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Vedi all'istante se la supply è stata comprata nello stesso blocco da wallet coordinati.
+                </p>
+            </div>
+
+            <div class="bg-panel/60 border border-panelBorder rounded-xl p-5">
+                <div class="text-emerald text-xl mb-2">
+                    <i class="ph-fill ph-detective"></i>
+                </div>
+                <h3 class="text-white font-bold text-base mb-1">Controllo Dev & Insider</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Scopri se il creatore detiene ancora token su wallet secondari o ha già fatto rug in passato.
+                </p>
+            </div>
+
+            <div class="bg-panel/60 border border-panelBorder rounded-xl p-5">
+                <div class="text-emerald text-xl mb-2">
+                    <i class="ph-fill ph-lock-key"></i>
+                </div>
+                <h3 class="text-white font-bold text-base mb-1">100% Sicura (Solo Lettura)</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Non richiede mai la connessione al tuo wallet. Legge solo l'indirizzo pubblico del token sulla pagina.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 5. Footer Minimale -->
+    <footer class="border-t border-panelBorder py-6 text-center text-xs text-slate-500">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span><strong>AxiomShield</strong> — Estensione Anti-Rug per Axiom.trade</span>
+            <span>Gratuito • Nessun permesso sul wallet richiesto</span>
+        </div>
+    </footer>
+
+    <!-- Modal Semplice di Installazione -->
+    <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+        <div class="bg-panel border border-panelBorder max-w-sm w-full rounded-2xl p-6 text-center shadow-2xl">
+            <div class="w-12 h-12 rounded-xl bg-emerald/15 text-emerald flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="ph-fill ph-google-chrome-logo"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Installa AxiomShield</h3>
+            <p class="text-sm text-slate-400 mb-6">
+                Aggiungi l'estensione a Chrome e apri qualsiasi token su Axiom.trade per visualizzare il box di sicurezza.
+            </p>
+            <div class="flex gap-2">
+                <button onclick="closeModal()" class="flex-1 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-sm font-medium">
+                    Chiudi
+                </button>
+                <button onclick="closeModal()" class="flex-1 py-2.5 rounded-lg bg-emerald hover:bg-emerald/90 text-obsidian text-sm font-bold">
+                    Vai allo Store
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setMode(mode) {
+            const card = document.getElementById('demo-card');
+            const btnSafe = document.getElementById('btn-safe');
+            const btnRug = document.getElementById('btn-rug');
+            const icon = document.getElementById('status-icon');
+            const ticker = document.getElementById('token-ticker');
+            const label = document.getElementById('status-label');
+            const score = document.getElementById('trust-score');
+
+            const valDev = document.getElementById('val-dev');
+            const valBundle = document.getElementById('val-bundle');
+            const valLp = document.getElementById('val-lp');
+            const valMint = document.getElementById('val-mint');
+
+            if (mode === 'safe') {
+                btnSafe.className = "px-4 py-2 rounded-lg font-mono text-xs font-semibold border transition-all bg-emerald/15 border-emerald text-emerald";
+                btnRug.className = "px-4 py-2 rounded-lg font-mono text-xs font-semibold border transition-all bg-panel border-panelBorder text-slate-400 hover:text-white";
+                
+                card.className = "bg-panel border border-emerald/40 rounded-2xl p-6 shadow-2xl transition-colors duration-300";
+                icon.className = "w-10 h-10 rounded-xl bg-emerald/15 text-emerald flex items-center justify-center text-xl";
+                icon.innerHTML = '<i class="ph-fill ph-check-circle"></i>';
+
+                ticker.textContent = "$BONK2";
+                label.textContent = "CONTRATTO PULITO — NESSUN BUNDLE";
+                label.className = "text-xs font-mono font-semibold text-emerald";
+
+                score.textContent = "94/100";
+                score.className = "text-2xl font-bold text-emerald";
+
+                valDev.textContent = "0.0%";
+                valDev.className = "text-sm font-bold text-emerald";
+
+                valBundle.textContent = "1.8%";
+                valBundle.className = "text-sm font-bold text-emerald";
+
+                valLp.textContent = "Bruciata";
+                valLp.className = "text-sm font-bold text-emerald";
+
+                valMint.textContent = "Revocata";
+                valMint.className = "text-sm font-bold text-emerald";
+            } else {
+                btnRug.className = "px-4 py-2 rounded-lg font-mono text-xs font-semibold border transition-all bg-crimson/15 border-crimson text-crimson";
+                btnSafe.className = "px-4 py-2 rounded-lg font-mono text-xs font-semibold border transition-all bg-panel border-panelBorder text-slate-400 hover:text-white";
+
+                card.className = "bg-panel border border-crimson/50 rounded-2xl p-6 shadow-2xl transition-colors duration-300";
+                icon.className = "w-10 h-10 rounded-xl bg-crimson/15 text-crimson flex items-center justify-center text-xl";
+                icon.innerHTML = '<i class="ph-fill ph-warning-octagon"></i>';
+
+                ticker.textContent = "$ELONX";
+                label.textContent = "ALLARME RUG PULL — BUNDLE RILEVATO";
+                label.className = "text-xs font-mono font-semibold text-crimson";
+
+                score.textContent = "12/100";
+                score.className = "text-2xl font-bold text-crimson";
+
+                valDev.textContent = "42.0%";
+                valDev.className = "text-sm font-bold text-crimson";
+
+                valBundle.textContent = "64.5%";
+                valBundle.className = "text-sm font-bold text-crimson";
+
+                valLp.textContent = "Sbloccata";
+                valLp.className = "text-sm font-bold text-crimson";
+
+                valMint.textContent = "Attiva ⚠️";
+                valMint.className = "text-sm font-bold text-crimson";
+            }
+        }
+
+        function openModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
